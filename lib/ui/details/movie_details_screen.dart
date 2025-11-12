@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/data/favorites_view_model.dart';
-import 'package:my_project/data/remote/movie_api_service.dart';
+import 'package:my_project/data/remote/movie_api_model.dart';
+import 'package:my_project/data/remote/movie_api_service.dart' as service;
 import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class MovieDetailsScreen extends StatefulWidget {
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   bool isLoading = true;
   bool isFavorite = false;
-  Map<String, dynamic>? movie;
+  MovieApiModel? movie;
   String? trailerKey;
   List<dynamic> castList = [];
 
@@ -32,20 +33,21 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   Future<void> fetchMovieDetails() async {
     try {
-      final api = MovieApiService();
+      final api = service.MovieApiService();
       final details = await api.getMovieDetails(widget.movieId);
       final videos = await api.getMovieVideos(widget.movieId);
       final credits = await api.getMovieCredits(widget.movieId);
 
+      final fetchedMovie = MovieApiModel.fromJson(details);
+
       setState(() {
-        movie = details;
-        trailerKey = (videos['results'] as List)
-            .firstWhere(
-              (v) => v['site'] == "YouTube" && v['type'] == "Trailer",
-              orElse: () => null,
-            )?['key'];
+        movie = fetchedMovie;
+        trailerKey = (videos['results'] as List).firstWhere(
+          (v) => v['site'] == "YouTube" && v['type'] == "Trailer",
+          orElse: () => null,
+        )?['key'];
         castList = credits['cast'];
-        isFavorite = widget.favoritesViewModel.isFavorite(movie!);
+        isFavorite = widget.favoritesViewModel.isFavorite(fetchedMovie);
         isLoading = false;
       });
     } catch (e) {
@@ -89,7 +91,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         bottomRight: Radius.circular(24)),
                     image: DecorationImage(
                       image: NetworkImage(
-                          "https://image.tmdb.org/t/p/w500${movie!['poster_path']}"),
+                          "https://image.tmdb.org/t/p/w500${movie!.posterPath}"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -115,14 +117,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.bookmark_border, color: Colors.white),
-                    onPressed: () {},
-                  ),
-                ),
               ],
             ),
             Padding(
@@ -130,24 +124,26 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(movie!['title'],
+                  Text(movie!.title,
                       style: const TextStyle(
                           color: Colors.white, fontSize: 26)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text("⭐ ${movie!['vote_average']}",
+                      Text("⭐ ${movie!.voteAverage ?? 'N/A'}",
                           style: const TextStyle(color: Colors.grey)),
                       const SizedBox(width: 16),
-                      Text(movie!['release_date'] ?? "",
+                      Text(movie!.releaseDate ?? "",
                           style: const TextStyle(color: Colors.grey)),
                       const SizedBox(width: 16),
-                      Text((movie!['original_language'] ?? "N/A").toUpperCase(),
+                      Text((movie!.originalLanguage).toUpperCase(),
                           style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(movie!['overview'] ?? "No description available.",
+                  Text(movie!.overview.isNotEmpty
+                      ? movie!.overview
+                      : "No description available.",
                       style: const TextStyle(
                           color: Colors.white, fontSize: 15, height: 1.4)),
                   const SizedBox(height: 20),
@@ -182,11 +178,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           onPressed: () {
                             setState(() {
                               isFavorite = !isFavorite;
-                              if (isFavorite) {
-                                widget.favoritesViewModel.addToFavorites(movie!);
-                              } else {
-                                widget.favoritesViewModel
-                                    .removeFromFavorites(movie!);
+                              if (movie != null) {
+                                if (isFavorite) {
+                                  widget.favoritesViewModel.addToFavorites(movie!);
+                                } else {
+                                  widget.favoritesViewModel
+                                      .removeFromFavorites(movie!);
+                                }
                               }
                             });
                           },

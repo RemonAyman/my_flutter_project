@@ -1,6 +1,7 @@
 // lib/data/favorites_view_model.dart
 import 'package:flutter/material.dart';
-import 'movie_api_model.dart';
+import 'remote/movie_api_model.dart';
+
 
 class FavoritesViewModel extends ChangeNotifier {
   final List<MovieApiModel> _favorites = [];

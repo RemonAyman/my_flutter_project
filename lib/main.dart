@@ -5,6 +5,8 @@ import 'ui/details/movie_details_screen.dart';
 import 'data/favorites_view.dart';
 import 'data/favorites_view_model.dart';
 
+
+
 void main() {
   runApp(
     MultiProvider(
@@ -38,7 +40,6 @@ class MyApp extends StatelessWidget {
           final movieId = int.tryParse(idStr) ?? 0;
           return MaterialPageRoute(
             builder: (context) => MovieDetailsScreen(
-              navController: Navigator.of(context),
               movieId: movieId,
               favoritesViewModel: Provider.of<FavoritesViewModel>(context, listen: false),
             ),

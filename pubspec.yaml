@@ -18,6 +18,8 @@ dependencies:
   cached_network_image: ^3.2.3
   # لتسهيل الـ state management للـ Favorites
   provider: ^6.0.7
+  # تم إضافة url_launcher
+  url_launcher: ^6.1.10
 
 dev_dependencies:
   flutter_test:
@@ -26,18 +28,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-  assets:
-    - assets/images/
-
-  fonts:
-    - family: Schyler
-      fonts:
-        - asset: fonts/Schyler-Regular.ttf
-        - asset: fonts/Schyler-Italic.ttf
-          style: italic
-    - family: Trajan Pro
-      fonts:
-        - asset: fonts/TrajanPro.ttf
-        - asset: fonts/TrajanPro_Bold.ttf
-          weight: 700

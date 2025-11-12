@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import '../../data/remote/movie_api_service.dart';
+import '../../data/remote/movie_api_model.dart';
+import '../../data/favorites_view_model.dart';
+import '../details/movie_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   final Function(int) onMovieTap;
 
-  SearchScreen({required this.onMovieTap});
+  const SearchScreen({super.key, required this.onMovieTap});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -147,7 +153,17 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemBuilder: (context, index) {
                     final movie = searchResults[index];
                     return ListTile(
-                      onTap: () => widget.onMovieTap(movie['id']),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => MovieDetailsScreen(
+                              movieId: movie['id'],
+                              favoritesViewModel: Provider.of<FavoritesViewModel>(context, listen: false),
+                            ),
+                          ),
+                        );
+                        widget.onMovieTap(movie['id']);
+                      },
                       leading: movie['poster_path'] != null
                           ? Image.network(
                               "https://image.tmdb.org/t/p/w500${movie['poster_path']}",
@@ -195,8 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             color: const Color(0xFF2A1B3D),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child:
-                              Text(item, style: const TextStyle(color: Colors.white)),
+                          child: Text(item, style: const TextStyle(color: Colors.white)),
                         ),
                       ),
                     )

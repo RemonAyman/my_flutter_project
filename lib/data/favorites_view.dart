@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'favorites_view.dart';
-import '../details/movie_details_screen.dart';
+import '/ui/details/movie_details_screen.dart';
+import 'favorites_view_model.dart';
 
 class FavoritesScreen extends StatelessWidget {
   final FavoritesViewModel viewModel;
